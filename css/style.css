@@ -198,6 +198,11 @@ img {
   font-weight: 700;
   background-color: var(--red);
   color: #fff;
+  transition: 0.3s ease-in-out;
+}
+
+#product-listing .container .product-cart .card .order-btn button:hover {
+  width: 75%;
 }
 
 #product-listing .container .product-cart .card h3 {

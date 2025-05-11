@@ -160,6 +160,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         const removeProductItem = event.target.closest(".remove-product");
         if (removeProductItem) {
           const productItem = removeProductItem.closest(".product-cart-item");
+          const h5Elements = productItem.querySelectorAll("h5");
+          let quantity = 0;
+          if (h5Elements.length >= 2) {
+            const quantitySpan = h5Elements[1].querySelector("span");
+
+            if (quantitySpan) {
+              const match = quantitySpan.textContent.trim().match(/^(\d+)x$/);
+              if (match) {
+                quantity = parseInt(match[1], 10); // Increment quantity
+              }
+            }
+          }
 
           if (productItem) {
             const line = productItem.previousElementSibling; // assumes .cart-line is before the item
@@ -170,7 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
 
           // Optionally update cart count and total
-          count = Math.max(0, count - 1);
+          count = Math.max(0, count - quantity);
           const cartItemsCount = document.querySelector(".cart-item-count");
           cartItemsCount.textContent = `Your Cart (${count})`;
 

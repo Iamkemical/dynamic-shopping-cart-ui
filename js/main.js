@@ -215,6 +215,126 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         }
       });
+
+      document.body.addEventListener("click", (event) => {
+        if (event.target.closest(".order-btn")) {
+          const existingCartItems =
+            document.querySelectorAll(".product-cart-item");
+
+          // Create overlay and modal container
+          const modalOverlay = document.createElement("div");
+          modalOverlay.className = "order-modal-overlay";
+
+          const orderModal = document.createElement("div");
+          orderModal.className = "order-modal";
+
+          // Start modal content with header
+          let modalContent = `
+      <img src="/assets/images/icon-order-confirmed.svg" alt="" />
+      <h3>Order Confirmed</h3>
+      <h6>We hope you enjoy your food</h6>
+      <div class="product-modal-card">
+    `;
+
+          let totalAmount = 0;
+
+          existingCartItems.forEach((cartItem, index) => {
+            const productName = cartItem
+              .querySelector("h5:nth-of-type(1)")
+              ?.textContent.trim();
+            const priceInfo = cartItem.querySelector("h5:nth-of-type(2)");
+
+            if (productName && priceInfo) {
+              const spans = priceInfo.querySelectorAll("span");
+              const quantityText = spans[0]?.textContent
+                .replace("x", "")
+                .trim();
+              const unitPrice = parseFloat(
+                spans[1]?.textContent.replace("$", "")
+              );
+              const totalPrice = parseFloat(
+                spans[2]?.textContent.replace("$", "")
+              );
+
+              totalAmount += totalPrice;
+              const product = products.find(
+                (product) => product.name === productName
+              );
+              modalContent += `
+          <div class="product-item">
+            <div>
+              <img src="${product.image.thumbnail}" alt="" />
+              <div>
+                <h5>${productName}</h5>
+                <h5><span>${quantityText}x</span> @ $${unitPrice.toFixed(
+                2
+              )}</h5>
+              </div>
+            </div>
+            <h5>$${totalPrice.toFixed(2)}</h5>
+          </div>
+        `;
+
+              if (index !== existingCartItems.length - 1) {
+                modalContent += `<div class="cart-line"></div>`;
+              }
+            }
+          });
+
+          // Add total and close modal button
+          modalContent += `
+      <div class="cart-line"></div>
+      <div class="order-total-modal">
+        <h5>Order Total</h5>
+        <h3>$${totalAmount.toFixed(2)}</h3>
+      </div>
+      </div>
+      <div>
+        <button id="start-new-order">Start New Order</button>
+      </div>
+    `;
+
+          orderModal.innerHTML = modalContent;
+          modalOverlay.appendChild(orderModal);
+          document.body.appendChild(modalOverlay);
+
+          // Close modal on background click
+          modalOverlay.addEventListener("click", (e) => {
+            if (e.target === modalOverlay) {
+              modalOverlay.remove();
+            }
+          });
+
+          // Optional: reset cart on "Start New Order"
+          orderModal
+            .querySelector("#start-new-order")
+            .addEventListener("click", () => {
+              modalOverlay.remove();
+              document
+                .querySelectorAll(".product-cart-item")
+                .forEach((item) => item.remove());
+              document
+                .querySelectorAll(".cart-line")
+                .forEach((line) => line.remove());
+              document.querySelector(".cart-order-total")?.remove();
+              document.querySelector(".carbon-neutral")?.remove();
+              document.querySelector(".order-btn")?.remove();
+
+              const cartCard = document.getElementById("cart-card");
+              const cartContent = document.createElement("div");
+              cartContent.className = "cart-content";
+              cartContent.innerHTML = `
+        <img src="/assets/images/illustration-empty-cart.svg" alt="" />
+        <h5>Your added items will appear here</h5>
+      `;
+              cartCard.append(cartContent);
+
+              document.querySelector(
+                ".cart-item-count"
+              ).textContent = `Your Cart (0)`;
+            });
+        }
+      });
     } else {
       alert("Failed to load products.");
     }
